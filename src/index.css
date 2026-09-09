@@ -1,0 +1,348 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ---------- 主題：暖橘主色、成功綠、Boss 紫、奶油白底 ---------- */
+:root {
+  font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+  line-height: 1.55;
+  --radius: 1rem;
+
+  --background: oklch(0.985 0.012 80);
+  --foreground: oklch(0.25 0.03 50);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.25 0.03 50);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.25 0.03 50);
+  --primary: oklch(0.72 0.17 55);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.95 0.03 75);
+  --secondary-foreground: oklch(0.35 0.05 50);
+  --muted: oklch(0.955 0.015 80);
+  --muted-foreground: oklch(0.55 0.03 60);
+  --accent: oklch(0.95 0.04 70);
+  --accent-foreground: oklch(0.3 0.05 50);
+  --destructive: oklch(0.6 0.2 25);
+  --border: oklch(0.9 0.02 75);
+  --input: oklch(0.9 0.02 75);
+  --ring: oklch(0.72 0.17 55);
+
+  --success: oklch(0.68 0.16 150);
+  --success-foreground: oklch(1 0 0);
+  --boss: oklch(0.6 0.2 300);
+  --boss-foreground: oklch(1 0 0);
+  --gold: oklch(0.82 0.16 85);
+  --gold-foreground: oklch(0.35 0.08 60);
+  --sky: oklch(0.7 0.12 230);
+
+  --chart-1: var(--primary);
+  --chart-2: var(--success);
+  --chart-3: var(--boss);
+  --chart-4: var(--gold);
+  --chart-5: var(--sky);
+  --sidebar: var(--card);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--accent);
+  --sidebar-accent-foreground: var(--accent-foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
+}
+
+@theme inline {
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-boss: var(--boss);
+  --color-boss-foreground: var(--boss-foreground);
+  --color-gold: var(--gold);
+  --color-gold-foreground: var(--gold-foreground);
+  --color-sky: var(--sky);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --animate-pop: pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  --animate-wiggle: wiggle 0.6s ease-in-out;
+  --animate-float: float 3s ease-in-out infinite;
+  --animate-confetti: confetti 0.9s ease-out both;
+  --animate-shine: shine 1.6s linear infinite;
+
+  @keyframes pop {
+    0% {
+      transform: scale(0.6);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+  @keyframes wiggle {
+    0%,
+    100% {
+      transform: rotate(0);
+    }
+    25% {
+      transform: rotate(-8deg);
+    }
+    75% {
+      transform: rotate(8deg);
+    }
+  }
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-5px);
+    }
+  }
+  @keyframes confetti {
+    0% {
+      transform: translateY(0) scale(0.4);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(-70px) scale(1.2);
+      opacity: 0;
+    }
+  }
+  @keyframes shine {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-background text-foreground m-0 antialiased;
+    background-image: radial-gradient(oklch(0.9 0.05 70 / 0.35) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+  code,
+  pre {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.92em;
+  }
+  code {
+    @apply rounded-md bg-accent px-1.5 py-0.5 text-accent-foreground;
+  }
+  pre code {
+    @apply bg-transparent p-0 text-inherit;
+  }
+  a {
+    @apply text-primary underline-offset-4 hover:underline;
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+}
+
+/* ---------- 共用元件（Tailwind 寫不進 JSX 的部分） ---------- */
+@layer components {
+  .step-card-shadow {
+    box-shadow:
+      0 1px 2px oklch(0.4 0.05 50 / 0.06),
+      0 12px 32px -12px oklch(0.6 0.15 55 / 0.35);
+  }
+  .xp-shine {
+    background-image: linear-gradient(90deg, transparent 0%, oklch(1 0 0 / 0.45) 50%, transparent 100%);
+    background-size: 200% 100%;
+    animation: var(--animate-shine);
+  }
+  .choice-row {
+    @apply flex cursor-pointer items-start gap-3 rounded-xl px-3 py-2.5 hover:bg-accent/60;
+  }
+  .choice-row input {
+    @apply mt-1 size-5 shrink-0 accent-primary;
+  }
+  .choice {
+    @apply leading-relaxed;
+  }
+  .crumbs {
+    @apply mb-3 flex gap-4 text-sm text-muted-foreground;
+  }
+  .crumbs a {
+    @apply text-muted-foreground no-underline hover:text-primary;
+  }
+  .lead {
+    @apply mt-1 mb-4 text-muted-foreground;
+  }
+  .primary {
+    @apply inline-flex h-11 items-center justify-center rounded-xl bg-primary px-6 font-bold text-primary-foreground shadow-md transition-transform hover:-translate-y-0.5 hover:bg-primary/90 active:translate-y-0 disabled:opacity-40 disabled:hover:translate-y-0;
+  }
+  .fn-ref {
+    @apply ml-0.5 align-super text-[0.7em] font-bold no-underline;
+  }
+  .empty {
+    @apply rounded-2xl border border-dashed bg-card/60 px-4 py-8 text-center text-muted-foreground;
+  }
+}
+
+/* ---------- 同事原版教材／測驗頁（維持簡潔） ---------- */
+.detail-page h1 {
+  @apply mb-1 text-2xl font-black tracking-tight;
+}
+.detail-page h2 {
+  @apply mt-6 mb-2 text-base font-bold text-muted-foreground;
+}
+.detail-page ul {
+  @apply list-disc space-y-1.5 pl-5;
+}
+.detail-page ul.tasks {
+  @apply list-none space-y-0 pl-0;
+}
+.detail-page .notes {
+  @apply mt-6 rounded-2xl bg-card p-4 text-sm;
+}
+.detail-page .notes h2 {
+  @apply mt-0;
+}
+.detail-page .primary {
+  @apply mt-6;
+}
+[data-testid="quiz-title"],
+[data-testid="result-title"] {
+  @apply my-2 text-2xl font-black;
+}
+.error-count {
+  @apply text-destructive;
+}
+.perfect {
+  @apply font-bold text-gold-foreground;
+}
+
+.quiz,
+.review {
+  @apply list-none space-y-4 p-0;
+}
+.quiz-item,
+.review-item {
+  @apply overflow-hidden rounded-2xl border bg-card;
+}
+.review-item.ok {
+  border-color: var(--success);
+}
+.review-item.bad {
+  border-color: var(--destructive);
+}
+.panel-head {
+  @apply flex items-start gap-3 border-b bg-muted/60 px-4 py-3;
+}
+.panel-num {
+  @apply grid size-7 shrink-0 place-items-center rounded-full bg-primary text-sm font-bold text-primary-foreground;
+}
+.prompt {
+  @apply m-0 flex-1 font-semibold leading-relaxed;
+}
+.verdict {
+  @apply m-0 flex items-center gap-1 text-sm font-bold;
+}
+.verdict.ok {
+  color: var(--success);
+}
+.verdict.bad {
+  color: var(--destructive);
+}
+.panel-body {
+  @apply px-3 py-2;
+}
+.panel-body fieldset {
+  @apply m-0 border-0 p-0;
+}
+.panel-body p {
+  @apply my-1.5 px-1;
+}
+.explain {
+  @apply mt-2 rounded-xl bg-accent/70 px-3 py-2 text-sm;
+}
+.score {
+  @apply my-1 text-5xl font-black text-primary;
+}
+
+/* 日誌 Markdown */
+.md h2 {
+  @apply mb-3 text-xl font-black;
+}
+.md h3 {
+  @apply mt-5 mb-2 text-base font-bold text-primary;
+}
+.md h4 {
+  @apply mt-4 mb-1 text-sm font-bold text-muted-foreground;
+}
+.md p {
+  @apply my-2 leading-relaxed;
+}
+.md ul,
+.md ol {
+  @apply my-2 space-y-1 pl-5;
+}
+.md ul {
+  @apply list-disc;
+}
+.md ol {
+  @apply list-decimal;
+}
+.md pre {
+  @apply my-3 overflow-x-auto rounded-xl bg-foreground p-3 text-sm text-background;
+}
+.md pre code {
+  color: inherit;
+}
