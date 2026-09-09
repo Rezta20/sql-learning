@@ -58,9 +58,15 @@ export function loadState(): StoredState {
 /** 進度一改就廣播，讓 Layout 的 XP 條／夥伴即時更新。 */
 export const PROGRESS_EVENT = 'sql-progress-changed'
 
-export function saveState(state: StoredState): void {
+export function saveState(state: StoredState, opts: { touch?: boolean } = {}): void {
+  if (opts.touch !== false) state.savedAt = new Date().toISOString()
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
   if (typeof window !== 'undefined') window.dispatchEvent(new Event(PROGRESS_EVENT))
+}
+
+/** 從雲端／備份檔整份覆蓋（不更新 savedAt，沿用檔案裡的） */
+export function replaceState(state: StoredState): void {
+  saveState(state, { touch: false })
 }
 
 /** 讀取、修改、存回，並把今天記進 activity（算連續天數用）。 */
@@ -97,7 +103,8 @@ export function clearQuiz(dayId: number): void {
 
 export function clearAllProgress(): void {
   hideExtra()
-  localStorage.removeItem(STORAGE_KEY)
+  // 存一份「有時間戳的空狀態」而不是刪 key：這樣雲端同步才知道「重設」是新的動作，不會把舊進度拉回來
+  saveState(empty())
   const toRemove: string[] = []
   for (let i = 0; i < sessionStorage.length; i += 1) {
     const key = sessionStorage.key(i)

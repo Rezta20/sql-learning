@@ -83,6 +83,8 @@ export type StoredState = {
   activity: string[]
   routine: { date: string; checks: boolean[] }
   timer: { startedAt: string } | null
+  /** 最後一次存檔時間（ISO），雲端同步比新舊用 */
+  savedAt?: string
 }
 
 export type QuizAttempt = {

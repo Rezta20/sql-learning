@@ -1,5 +1,4 @@
 # 推到 GitHub 的 main 分支後，自動 build 並部署到 GitHub Pages。
-# 第一次要到 repo 的 Settings → Pages → Source 選「GitHub Actions」。
 name: Deploy to GitHub Pages
 
 on:
@@ -21,6 +20,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # 第一次會自動把 repo 的 Pages 打開（Source = GitHub Actions）
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - uses: actions/setup-node@v4
         with:
           node-version: 22

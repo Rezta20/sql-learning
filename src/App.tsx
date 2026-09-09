@@ -10,6 +10,7 @@ import { ResultPage } from './pages/ResultPage'
 import { SetupPage } from './pages/SetupPage'
 import { CardsPage } from './pages/CardsPage'
 import { JournalPage } from './pages/JournalPage'
+import { SyncPage } from './pages/SyncPage'
 
 export default function App() {
   return (
@@ -22,6 +23,7 @@ export default function App() {
             <Route path="/setup" element={<SetupPage />} />
             <Route path="/cards" element={<CardsPage />} />
             <Route path="/journal" element={<JournalPage />} />
+            <Route path="/sync" element={<SyncPage />} />
             <Route path="/day/:id" element={<StagePage />} />
             <Route path="/day/:id/detail" element={<DayPage />} />
             <Route path="/day/:id/quiz" element={<QuizPage />} />

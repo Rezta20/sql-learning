@@ -26,18 +26,16 @@
 
 ## 進度存在哪
 
-進度存在瀏覽器的 `localStorage`（這台電腦、這個瀏覽器）。關機重開不會消失；換電腦或清除瀏覽資料會歸零。
-如需跨裝置，可推上 GitHub 用 GitHub Pages 開同一個網址，但進度仍是各瀏覽器各存一份。
+- 平常存在瀏覽器 `localStorage`，關機重開不會消失。
+- **雲端同步**（頁首雲朵 → `/sync`）：貼一個只有 `gist` 權限的 GitHub token，進度會存成你帳號裡的私人 Gist（`sql-learning-progress.json`）。每次打勾 2 秒後自動上傳；開 App 時先拉一次，誰的 `savedAt` 新誰贏。換電腦或清瀏覽資料 → 再貼同一個 token，會自動找回同一個 Gist。
+- 沒有 GitHub 也可以：`/sync` 頁有「下載備份／匯入備份」JSON。
+- 老師端的紀錄（`study/progress.md`、`study/journal/`）在 repo 裡，跟著 git 走。
 
 ## 部署到 GitHub Pages
 
-1. 在 GitHub 建一個空 repo，然後：
-   ```bash
-   git remote add origin git@github.com:<你的帳號>/<repo>.git
-   git push -u origin main
-   ```
-2. 到 repo **Settings → Pages → Source** 選 **GitHub Actions**。
-3. 之後每次 `git push`，`.github/workflows/pages.yml` 會自動 build 並部署到 `https://<你的帳號>.github.io/<repo>/`。
+網址：<https://rezta20.github.io/sql-learning/>
+
+每次 `git push` 到 `main`，`.github/workflows/pages.yml` 會自動 build 並部署（第一次會自動開啟 Pages）。
 
 ## 開發
 

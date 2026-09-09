@@ -40,6 +40,44 @@ test('夥伴飽食度：今天有學是 100；三天沒學會餓昏，做一步�
   await expect(page.getByTestId('fullness')).toHaveAttribute('data-value', '100')
 })
 
+test('雲端同步：貼 token 建 gist；雲端較新會拉回本地', async ({ page }) => {
+  let remote: Record<string, unknown> | null = null
+  await page.route('https://api.github.com/**', async (route) => {
+    const req = route.request()
+    const url = req.url()
+    const json = (body: unknown, status = 200) => route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body) })
+    if (url.endsWith('/user')) return json({ login: 'Rezta20' })
+    if (url.includes('/gists?')) return json(remote ? [{ id: 'g1', files: { 'sql-learning-progress.json': {} } }] : [])
+    if (url.endsWith('/gists') && req.method() === 'POST') {
+      remote = JSON.parse(JSON.parse(req.postData() ?? '{}').files['sql-learning-progress.json'].content)
+      return json({ id: 'g1' })
+    }
+    if (url.endsWith('/gists/g1') && req.method() === 'PATCH') {
+      remote = JSON.parse(JSON.parse(req.postData() ?? '{}').files['sql-learning-progress.json'].content)
+      return json({ id: 'g1' })
+    }
+    if (url.endsWith('/gists/g1')) return json({ id: 'g1', files: { 'sql-learning-progress.json': { content: JSON.stringify(remote), raw_url: 'x' } } })
+    return json({}, 404)
+  })
+
+  await page.goto('/sync')
+  await expect(page.getByTestId('sync-indicator')).toHaveAttribute('data-status', 'off')
+  await page.getByTestId('sync-token').fill('ghp_fake')
+  await page.getByTestId('sync-connect').click()
+  await expect(page.getByTestId('sync-indicator')).toHaveAttribute('data-status', 'idle')
+  await expect(page.getByTestId('sync-card')).toContainText('已連線')
+
+  // 模擬另一台電腦上傳了更新的進度（多抄了 3 張卡 = 30 XP）
+  remote = {
+    ...(remote ?? {}),
+    cards: { '1': { writtenAt: '2026-01-01' }, '2': { writtenAt: '2026-01-01' }, '3': { writtenAt: '2026-01-01' } },
+    savedAt: new Date(Date.now() + 60_000).toISOString(),
+  }
+  await page.getByRole('button', { name: '現在同步' }).click()
+  await page.goto('/')
+  await expect(page.getByTestId('xp-text')).toContainText('30 XP')
+})
+
 test('今天頁：關 0 未完成時只顯示一張卡與一顆按鈕', async ({ page }) => {
   await page.goto('/')
   await expect(page.getByTestId('today-card')).toContainText('關 0')

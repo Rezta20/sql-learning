@@ -1,7 +1,9 @@
-import { BookOpen, Map, NotebookPen, Target } from 'lucide-react'
+import { BookOpen, Cloud, CloudOff, Map, NotebookPen, Target } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { levelFor, streak, totalXp } from '../lib/progress'
+import { SYNC_EVENT, getSyncStatus } from '../lib/sync'
 import { useProgress } from '../lib/useProgress'
 import { BuddyCard } from './BuddyCard'
 import { TimerBar } from './TimerBar'
@@ -18,6 +20,12 @@ export function Layout() {
   const xp = totalXp(state)
   const lv = levelFor(xp)
   const days = streak(state)
+  const [sync, setSync] = useState(() => getSyncStatus())
+  useEffect(() => {
+    const f = () => setSync(getSyncStatus())
+    window.addEventListener(SYNC_EVENT, f)
+    return () => window.removeEventListener(SYNC_EVENT, f)
+  }, [])
 
   return (
     <div className="mx-auto max-w-3xl px-4 pb-28 sm:px-6">
@@ -45,6 +53,21 @@ export function Layout() {
           </div>
 
           <TimerBar />
+          <NavLink
+            to="/sync"
+            className={cn(
+              'grid size-8 shrink-0 place-items-center rounded-full border no-underline transition-colors hover:bg-accent hover:no-underline',
+              sync.status === 'off' && 'text-muted-foreground',
+              sync.status === 'idle' && 'text-success',
+              sync.status === 'syncing' && 'text-primary animate-pulse',
+              sync.status === 'error' && 'text-destructive',
+            )}
+            title={sync.status === 'off' ? '雲端同步：未連線' : sync.status === 'error' ? `同步出錯：${sync.error}` : '雲端同步：已連線'}
+            data-testid="sync-indicator"
+            data-status={sync.status}
+          >
+            {sync.status === 'off' || sync.status === 'error' ? <CloudOff className="size-4" /> : <Cloud className="size-4" />}
+          </NavLink>
         </div>
 
         <nav className="mt-3 flex gap-1 rounded-xl bg-muted p-1">
