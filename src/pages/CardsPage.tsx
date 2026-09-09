@@ -28,27 +28,27 @@ export function CardsPage() {
   for (const c of list) byStage.set(c.stage, [...(byStage.get(c.stage) ?? []), c])
 
   const tabs: { id: Filter; label: string; count: number }[] = [
-    { id: 'due', label: '📖 今天到期', count: due.length },
+    { id: 'due', label: '今天到期', count: due.length },
     { id: 'all', label: '全部', count: cards.length },
   ]
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-end justify-between">
-        <h1 className="m-0 text-2xl font-black">📝 卡片</h1>
+        <h1 className="m-0 text-2xl font-bold tracking-tight">卡片</h1>
         <span className="text-sm text-muted-foreground">
           已抄 <b className="text-foreground">{written}</b> · 畢業 <b className="text-foreground">{graduated}</b>
         </span>
       </div>
       <p className="m-0 text-sm text-muted-foreground">App 上的 #編號 = 筆記本上的 #編號。抄好點一下；到期點一下；三次都會了就畢業。</p>
 
-      <div className="tabs flex gap-1 rounded-full bg-muted p-1" data-testid="card-summary">
+      <div className="tabs flex gap-1 rounded-xl bg-muted p-1" data-testid="card-summary">
         {tabs.map((t) => (
           <button
             key={t.id}
             type="button"
             className={cn(
-              'tab flex flex-1 items-center justify-center gap-2 rounded-full py-1.5 text-sm font-semibold transition-colors',
+              'tab flex flex-1 items-center justify-center gap-2 rounded-lg py-1.5 text-sm font-medium transition-colors',
               filter === t.id ? 'bg-card shadow-sm' : 'text-muted-foreground hover:text-foreground',
             )}
             onClick={() => setFilter(t.id)}
@@ -59,7 +59,7 @@ export function CardsPage() {
         ))}
       </div>
 
-      {list.length === 0 ? <p className="empty m-0">今天沒有到期的卡 🎉</p> : null}
+      {list.length === 0 ? <p className="empty m-0">今天沒有到期的卡，很好。</p> : null}
 
       {Array.from(byStage.entries())
         .sort((a, b) => a[0] - b[0])
@@ -93,7 +93,7 @@ export function CardsPage() {
                   mutate((s) => {
                     const cp = s.cards[String(card.n)]
                     if (cp) cp.graduatedAt = new Date().toISOString()
-                  }, `🎓 +${XP.graduate} XP`)
+                  }, `畢業 +${XP.graduate} XP`)
                 }
               />
             ))}

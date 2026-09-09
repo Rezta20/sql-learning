@@ -8,7 +8,7 @@
 :root {
   font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
   line-height: 1.55;
-  --radius: 1rem;
+  --radius: 0.875rem;
 
   --background: oklch(0.985 0.012 80);
   --foreground: oklch(0.25 0.03 50);
@@ -165,8 +165,6 @@
   }
   body {
     @apply bg-background text-foreground m-0 antialiased;
-    background-image: radial-gradient(oklch(0.9 0.05 70 / 0.35) 1px, transparent 1px);
-    background-size: 22px 22px;
   }
   code,
   pre {

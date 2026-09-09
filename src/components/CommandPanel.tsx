@@ -1,3 +1,5 @@
+import { LifeBuoy, OctagonPause } from 'lucide-react'
+import type { ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
 import { copyText } from '../lib/clipboard'
 import { messages } from '../lib/messages'
@@ -20,7 +22,7 @@ export function MiniCommands() {
         onClick={() => send(messages.tooMuch, '太多了')}
         title="太多了：請老師濃縮成 3 行"
       >
-        🛑 太多了
+        <OctagonPause className="size-4" /> 太多了
       </Button>
       <Button
         type="button"
@@ -30,7 +32,7 @@ export function MiniCommands() {
         onClick={() => send(messages.stuck, '卡住')}
         title="卡住：複製後貼截圖給老師"
       >
-        🆘 卡住
+        <LifeBuoy className="size-4" /> 卡住
       </Button>
     </div>
   )
@@ -40,6 +42,7 @@ export function MiniCommands() {
 export function CopyButton({
   text,
   label,
+  icon,
   after,
   testId,
   onCopied,
@@ -47,6 +50,7 @@ export function CopyButton({
 }: {
   text: string
   label: string
+  icon?: ReactNode
   after: string
   testId?: string
   onCopied?: () => void
@@ -60,8 +64,9 @@ export function CopyButton({
   }
   const variant = tone === 'go' ? 'go' : tone === 'end' ? 'boss' : 'soft'
   return (
-    <div className="flex flex-col items-center gap-2">
+    <div className="flex w-full flex-col items-center gap-2">
       <Button type="button" variant={variant} size="xl" className="w-full max-w-sm" data-testid={testId} onClick={click}>
+        {icon}
         {label}
       </Button>
       <p className="m-0 text-center text-sm text-muted-foreground">{after}</p>

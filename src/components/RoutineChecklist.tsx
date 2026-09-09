@@ -1,3 +1,4 @@
+import { ChevronDown, ChevronRight } from 'lucide-react'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { ROUTINE_STEPS, routineChecks } from '../lib/progress'
@@ -18,21 +19,21 @@ export function RoutineChecklist() {
   }
 
   return (
-    <section className="rounded-2xl bg-card/70 ring-1 ring-border" data-testid="routine">
+    <section className="rounded-xl border bg-card/60" data-testid="routine">
       <button
         type="button"
-        className="flex w-full items-center justify-between px-4 py-2.5 text-sm font-semibold"
+        className="flex w-full items-center justify-between px-4 py-2.5 text-sm font-medium"
         onClick={() => setOpen(!open)}
         aria-expanded={open}
       >
-        <span>📋 今日流程</span>
+        <span>今日流程</span>
         <span className="flex items-center gap-2 text-muted-foreground">
           <span className="flex gap-1">
             {ROUTINE_STEPS.map((_, i) => (
               <span key={i} className={cn('size-2 rounded-full', checks[i] ? 'bg-success' : 'bg-border')} />
             ))}
           </span>
-          {done}/{ROUTINE_STEPS.length} {open ? '▾' : '▸'}
+          {done}/{ROUTINE_STEPS.length} {open ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
         </span>
       </button>
       {open ? (

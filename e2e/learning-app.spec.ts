@@ -19,6 +19,27 @@ function seed(s: unknown) {
   if (!localStorage.getItem('sql-learning:v1')) localStorage.setItem('sql-learning:v1', JSON.stringify(s))
 }
 
+test('夥伴飽食度：今天有學是 100；三天沒學會餓昏，做一步就回滿', async ({ page }) => {
+  const key = (daysAgo: number) => {
+    const d = new Date()
+    d.setDate(d.getDate() - daysAgo)
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  }
+  await page.addInitScript(seed, { ...SETUP_DONE, activity: [key(3)] })
+  await page.goto('/')
+  await expect(page.getByTestId('buddy-card')).toContainText('餓昏了')
+  await expect(page.getByTestId('fullness')).toHaveAttribute('data-value', '25')
+  await expect(page.getByTestId('buddy').first()).toHaveAttribute('data-stage', 'faint')
+
+  // 做一步（抄一張卡）= 餵食
+  await page.goto('/cards')
+  await page.locator('.tabs .tab', { hasText: '全部' }).click()
+  await page.getByTestId('card-write-1').click()
+  await page.goto('/')
+  await expect(page.getByTestId('buddy-card')).toContainText('吃飽了')
+  await expect(page.getByTestId('fullness')).toHaveAttribute('data-value', '100')
+})
+
 test('今天頁：關 0 未完成時只顯示一張卡與一顆按鈕', async ({ page }) => {
   await page.goto('/')
   await expect(page.getByTestId('today-card')).toContainText('關 0')

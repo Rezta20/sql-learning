@@ -1,3 +1,4 @@
+import { Timer, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -56,7 +57,7 @@ export function TimerBar() {
   if (!startedAt) {
     return (
       <Button type="button" variant="soft" size="sm" className="rounded-full" data-testid="timer-start" onClick={start}>
-        ⏱ {TOTAL_MIN} 分鐘
+        <Timer className="size-4" /> {TOTAL_MIN} 分
       </Button>
     )
   }
@@ -77,7 +78,7 @@ export function TimerBar() {
     >
       <div className="absolute inset-y-0 left-0 bg-primary/25 transition-[width] duration-1000" style={{ width: `${pct}%` }} />
       <span className="relative flex-1 truncate px-3 tabular-nums">
-        {!over ? `⏱ ${fmt(remaining)} · ${phase?.name ?? ''}` : '⏱ 時間到！收尾 → 結算'}
+        {!over ? `${fmt(remaining)} · ${phase?.name ?? ''}` : '時間到！收尾 → 結算'}
       </span>
       <button
         type="button"
@@ -85,7 +86,7 @@ export function TimerBar() {
         onClick={stop}
         aria-label="停止計時"
       >
-        ✕
+        <X className="size-3.5" />
       </button>
     </div>
   )

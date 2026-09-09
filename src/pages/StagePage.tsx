@@ -1,8 +1,10 @@
+import { Bug, Check, ChevronLeft, ChevronRight, Lightbulb, PawPrint, PenLine, Skull, Sparkles, Speech, Target, Terminal, type LucideIcon } from 'lucide-react'
 import { useMemo, useState, type ReactNode } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Buddy } from '../components/Buddy'
+import { hungerStage } from '../lib/hunger'
 import { CopyButton, MiniCommands } from '../components/CommandPanel'
 import { ExtraLockedNotice } from '../components/ExtraLockedNotice'
 import { RoutineChecklist } from '../components/RoutineChecklist'
@@ -76,29 +78,29 @@ const STEP_LABEL: Record<Step['kind'], string> = {
   done: '完成',
 }
 
-const STEP_EMOJI: Record<Step['kind'], string> = {
-  focus: '🎯',
-  concept: '💡',
-  card: '✍️',
-  exercise: '⌨️',
-  project: '🐾',
-  teach: '🗣',
-  boss: '👾',
-  done: '🎉',
+const STEP_ICON: Record<Step['kind'], LucideIcon> = {
+  focus: Target,
+  concept: Lightbulb,
+  card: PenLine,
+  exercise: Terminal,
+  project: PawPrint,
+  teach: Speech,
+  boss: Skull,
+  done: Sparkles,
 }
 
 function Kicker({ children }: { children: ReactNode }) {
-  return <p className="m-0 text-xs font-bold tracking-widest text-primary uppercase">{children}</p>
+  return <p className="m-0 text-sm font-semibold text-primary">{children}</p>
 }
 
 function Title({ children, className }: { children: ReactNode; className?: string }) {
-  return <h2 className={cn('mt-2 mb-5 text-2xl leading-snug font-black text-balance sm:text-3xl', className)}>{children}</h2>
+  return <h2 className={cn('mt-1 mb-5 text-2xl leading-snug font-bold tracking-tight text-balance sm:text-3xl', className)}>{children}</h2>
 }
 
 function NextButton({
   done,
   label,
-  doneLabel = '已完成 ✓ 下一步 ›',
+  doneLabel = '已完成，下一步',
   variant = 'success',
   testId,
   onClick,
@@ -112,6 +114,7 @@ function NextButton({
 }) {
   return (
     <Button type="button" variant={done ? 'soft' : variant} size="xl" className="w-full max-w-sm" data-testid={testId} onClick={onClick}>
+      {done ? <Check className="size-5" /> : null}
       {done ? doneLabel : label}
     </Button>
   )
@@ -164,6 +167,7 @@ export function StagePage() {
 
   const lp = state.lessons[lesson.id] ?? emptyLesson(lesson)
   const lv = levelFor(totalXp(state))
+  const StepIcon = STEP_ICON[step.kind]
 
   const renderStep = () => {
     switch (step.kind) {
@@ -176,9 +180,9 @@ export function StagePage() {
               <span className="mr-2 font-bold text-muted-foreground">怎麼算會了</span>
               {lesson.check}
             </div>
-            <CopyButton text={messages.start(state, stageId, lesson)} label="▶ 開始" after="貼到聊天框，老師開始上課。然後按「下一步」。" testId="step-start" />
+            <CopyButton text={messages.start(state, stageId, lesson)} label="開始" after="貼到聊天框，老師開始上課。然後按「下一步」。" testId="step-start" />
             <Button type="button" variant="ghost" className="mt-3" onClick={next} data-testid="step-next">
-              下一步 ›
+              下一步 <ChevronRight className="size-4" />
             </Button>
           </>
         )
@@ -198,9 +202,9 @@ export function StagePage() {
                 next()
               }}
             >
-              聽懂了 ›
+              <Check className="size-5" /> 聽懂了
             </Button>
-            <p className="mt-3 mb-0 text-sm text-muted-foreground">聽不懂？右下角 🛑 太多了。</p>
+            <p className="mt-3 mb-0 text-sm text-muted-foreground">聽不懂？按右下角「太多了」。</p>
           </>
         )
       case 'card': {
@@ -210,21 +214,23 @@ export function StagePage() {
         return (
           <>
             <Kicker>抄這張卡到筆記本</Kicker>
-            <div className="my-4 rounded-2xl border-2 border-dashed border-gold bg-[oklch(0.99_0.03_90)] p-5 text-left shadow-[4px_4px_0_0_var(--gold)]">
+            <div className="my-4 w-full rounded-xl border bg-[oklch(0.99_0.02_90)] p-5 text-left shadow-[0_2px_0_0_var(--border)]" style={{ backgroundImage: 'repeating-linear-gradient(transparent 0 27px, oklch(0.9 0.02 80) 27px 28px)' }}>
               <div className="flex flex-wrap items-baseline gap-2">
-                <span className="rounded-md bg-gold px-2 py-0.5 text-xs font-black text-gold-foreground">#{String(card.n).padStart(2, '0')}</span>
+                <span className="rounded bg-gold px-1.5 py-0.5 text-xs font-bold text-gold-foreground">#{String(card.n).padStart(2, '0')}</span>
                 <strong className="text-xl">{card.en}</strong>
                 <span className="text-muted-foreground">｜{card.zh}</span>
               </div>
-              <p className="mt-3 mb-2 text-lg leading-snug font-semibold">{card.line}</p>
-              <pre className="m-0 overflow-x-auto rounded-xl bg-foreground px-3 py-2 text-sm text-background">
+              <p className="mt-3 mb-2 text-lg leading-snug font-medium">{card.line}</p>
+              <pre className="m-0 overflow-x-auto rounded-lg bg-foreground px-3 py-2 text-sm text-background">
                 <code>{card.example}</code>
               </pre>
-              <p className="mt-3 mb-0 text-sm text-muted-foreground">✏️ {card.draw}</p>
+              <p className="mt-3 mb-0 flex items-start gap-1.5 text-sm text-muted-foreground">
+                <PenLine className="mt-0.5 size-4 shrink-0" /> {card.draw}
+              </p>
             </div>
             {written ? (
               <Button type="button" variant="soft" size="xl" className="w-full max-w-sm" onClick={next} data-testid="step-card-next">
-                已抄 ✓ 下一步 ›
+                <Check className="size-5" /> 已抄，下一步
               </Button>
             ) : (
               <Button
@@ -240,7 +246,7 @@ export function StagePage() {
                   next()
                 }}
               >
-                ✍️ 抄好了 ›
+                <PenLine className="size-5" /> 抄好了
               </Button>
             )}
           </>
@@ -261,7 +267,7 @@ export function StagePage() {
               <CopyButton text={messages.exercise(stageId, lesson, step.i)} label="做完了，貼給老師" after="貼上後把結果截圖一起送出。" tone="plain" />
               <NextButton
                 done={done}
-                label="✓ 老師說對了 ›"
+                label="老師說對了"
                 testId={`ex-${lesson.id}-${step.i}`}
                 onClick={() => {
                   if (!done) patchLesson((p) => (p.exercises[step.i] = true))
@@ -276,17 +282,17 @@ export function StagePage() {
       case 'project':
         return (
           <>
-            <Kicker>🐾 換成你的專案</Kicker>
+            <Kicker>換成你的專案</Kicker>
             <Title className="text-xl sm:text-2xl">{lesson.project}</Title>
             <div className="flex flex-col items-center gap-3">
               <CopyButton text={messages.project(stageId, lesson)} label="寫好了，貼給老師" after="把你寫的 SQL 或照片一起送出。" tone="plain" />
               <NextButton
                 done={lp.project}
-                label="✓ 老師說對了 ›"
+                label="老師說對了"
                 testId={`project-${lesson.id}`}
                 onClick={() => {
                   if (!lp.project) patchLesson((p) => (p.project = true))
-                  if (!lp.project) toast(`🐾 +${XP.project} XP`)
+                  if (!lp.project) toast(`+${XP.project} XP`)
                   next()
                 }}
               />
@@ -296,13 +302,13 @@ export function StagePage() {
       case 'teach':
         return (
           <>
-            <Kicker>🗣 用自己的話講一次</Kicker>
+            <Kicker>用自己的話講一次</Kicker>
             <Title className="text-xl sm:text-2xl">「{lesson.title}」是什麼？講給老師聽。</Title>
             <div className="flex flex-col items-center gap-3">
               <CopyButton text={messages.teach(stageId, lesson)} label="複製開頭，接著打你的話" after="不用完美，講錯老師會補一句。" tone="plain" />
               <NextButton
                 done={lp.teach}
-                label="✓ 老師聽懂了 ›"
+                label="老師聽懂了"
                 testId={`teach-${lesson.id}`}
                 onClick={() => {
                   if (!lp.teach) patchLesson((p) => (p.teach = true))
@@ -318,22 +324,22 @@ export function StagePage() {
         return (
           <>
             <Kicker>
-              <span className="text-boss">👾 {meta.isBigBoss ? '★ 大 Boss' : 'Boss 題'}</span>
+              <span className="text-boss">{meta.isBigBoss ? '大 Boss' : 'Boss 題'}</span>
             </Kicker>
             <Title className="text-xl sm:text-2xl">{meta.boss}</Title>
             <div className="flex flex-col items-center gap-3">
               <CopyButton text={messages.boss(stageId)} label="驗收，貼給老師" after="老師會出題；你答完他判定。" tone="plain" />
               <NextButton
                 done={done}
-                label="✓ 老師說過關了 ›"
-                doneLabel="已過關 ✓ 下一步 ›"
+                label="老師說過關了"
+                doneLabel="已過關，下一步"
                 variant="boss"
                 testId="boss-check"
                 onClick={() => {
                   if (!done) {
                     mutate((s) => {
                       s.boss[String(stageId)] = true
-                    }, `👾 過關！+${meta.isBigBoss ? XP.bigBoss : XP.boss} XP`)
+                    }, `過關！+${meta.isBigBoss ? XP.bigBoss : XP.boss} XP`)
                   }
                   next()
                 }}
@@ -346,19 +352,17 @@ export function StagePage() {
         const nextLesson = meta.lessons[lessonIndex(lesson)]
         return (
           <>
-            <div className="pointer-events-none absolute inset-x-0 top-6 flex justify-around text-2xl" aria-hidden="true">
-              {['🎉', '⭐', '🐾', '✨', '🎊'].map((e, i) => (
-                <span key={i} className="animate-confetti" style={{ animationDelay: `${i * 0.08}s` }}>
-                  {e}
-                </span>
+            <div className="pointer-events-none absolute inset-x-0 top-8 flex justify-around" aria-hidden="true">
+              {['bg-primary', 'bg-success', 'bg-boss', 'bg-gold', 'bg-sky', 'bg-primary'].map((c, i) => (
+                <span key={i} className={cn('block size-3 animate-confetti', i % 2 ? 'rounded-full' : 'rotate-45', c)} style={{ animationDelay: `${i * 0.08}s` }} />
               ))}
             </div>
-            <Buddy level={lv.lv} size="md" mood="cheer" className="mx-auto mb-3 w-fit" />
-            <Kicker>🎉 這一課完成</Kicker>
+            <Buddy level={lv.lv} stage={hungerStage(state)} size="md" cheer className="mx-auto mb-3" />
+            <Kicker>這一課完成</Kicker>
             <Title>{lesson.title}</Title>
             <CopyButton
               text={messages.settle(state, stageId, lesson)}
-              label="📊 結算，貼給老師"
+              label="結算，貼給老師"
               after="老師會寫今天的日誌、給你手寫卡總表。"
               tone="end"
               testId="step-settle"
@@ -372,10 +376,10 @@ export function StagePage() {
               onClick={() =>
                 mutate((s) => {
                   s.errorLogCount += 1
-                }, `🐛 +${XP.errorLog} XP`)
+                }, `+${XP.errorLog} XP`)
               }
             >
-              🐛 今天有卡住，錯誤日誌寫了 3 行（+{XP.errorLog}）
+              <Bug className="size-4" /> 今天有卡住，錯誤日誌寫了 3 行（+{XP.errorLog}）
             </Button>
             <div className="mt-2">
               {nextLesson ? (
@@ -387,11 +391,11 @@ export function StagePage() {
                     setStepIdx(0)
                   }}
                 >
-                  明天：第 {lessonIndex(nextLesson)} 課 {nextLesson.title} ›
+                  明天：第 {lessonIndex(nextLesson)} 課 {nextLesson.title} <ChevronRight className="size-4" />
                 </Button>
               ) : (
                 <Button asChild variant="link">
-                  <Link to="/map">回地圖 ›</Link>
+                  <Link to="/map">回地圖</Link>
                 </Button>
               )}
             </div>
@@ -407,7 +411,7 @@ export function StagePage() {
         <Link to="/">← 今天</Link>
         <Link to="/map">地圖</Link>
       </p>
-      <h1 className="m-0 text-xl font-black" data-testid="day-title">
+      <h1 className="m-0 text-xl font-bold tracking-tight" data-testid="day-title">
         {dayHeading(day)}
         {meta.isBigBoss ? ' ★' : ''} · {day.title}
       </h1>
@@ -421,15 +425,15 @@ export function StagePage() {
               key={l.id}
               type="button"
               className={cn(
-                'pill rounded-full px-3 py-1 text-sm font-semibold ring-1 transition-colors',
-                on ? 'bg-primary text-primary-foreground ring-primary' : done ? 'bg-success/15 text-success ring-success/30' : 'bg-card text-muted-foreground ring-border hover:bg-accent',
+                'pill inline-flex items-center gap-1 rounded-full border px-3 py-1 text-sm font-medium transition-colors',
+                on ? 'border-primary bg-primary text-primary-foreground' : done ? 'border-success/40 bg-success/10 text-success' : 'bg-card text-muted-foreground hover:bg-accent',
               )}
               onClick={() => {
                 setLessonId(l.id)
                 setStepIdx(null)
               }}
             >
-              {done ? '✅ ' : on ? '▶ ' : ''}第 {i + 1} 課
+              {done ? <Check className="size-3.5" /> : null}第 {i + 1} 課
             </button>
           )
         })}
@@ -437,10 +441,10 @@ export function StagePage() {
 
       <RoutineChecklist />
 
-      <section className="step-card-shadow relative overflow-hidden rounded-3xl bg-card ring-1 ring-border" data-testid="step" data-kind={step.kind}>
+      <section className="step-card-shadow relative overflow-hidden rounded-2xl border bg-card" data-testid="step" data-kind={step.kind}>
         <div className="flex items-center gap-2 border-b bg-muted/50 px-3 py-2">
           <Button type="button" variant="ghost" size="icon-sm" onClick={() => goto(idx - 1)} disabled={idx === 0} aria-label="上一步">
-            ‹
+            <ChevronLeft />
           </Button>
           <div className="flex flex-1 flex-wrap items-center justify-center gap-1.5" data-testid="step-dots">
             {steps.map((s, i) => {
@@ -461,11 +465,11 @@ export function StagePage() {
             })}
           </div>
           <Button type="button" variant="ghost" size="icon-sm" onClick={next} disabled={idx === steps.length - 1} aria-label="下一步">
-            ›
+            <ChevronRight />
           </Button>
         </div>
-        <p className="m-0 border-b px-4 py-1.5 text-center text-xs text-muted-foreground">
-          第 {lessonIndex(lesson)} 課 · {STEP_EMOJI[step.kind]} {STEP_LABEL[step.kind]} · 步 {idx + 1}/{steps.length}
+        <p className="m-0 flex items-center justify-center gap-1.5 border-b px-4 py-1.5 text-xs text-muted-foreground">
+          第 {lessonIndex(lesson)} 課 · <StepIcon className="size-3.5" /> {STEP_LABEL[step.kind]} · 步 {idx + 1}/{steps.length}
         </p>
         <div key={idx} className="flex flex-col items-center px-5 py-7 text-center animate-in fade-in slide-in-from-right-4 duration-300 sm:px-8">
           {renderStep()}

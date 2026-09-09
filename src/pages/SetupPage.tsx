@@ -30,7 +30,7 @@ export function SetupPage() {
       s.setup[id] = !s.setup[id]
     })
     setState(next)
-    if (!wasDone && setupDone(next) && !cleared) toast(`🛠️ 關 0 過關！+${XP.setup} XP`)
+    if (!wasDone && setupDone(next) && !cleared) toast(`關 0 過關！+${XP.setup} XP`)
   }
 
   const copy = async (cmd: string) => {
@@ -44,17 +44,16 @@ export function SetupPage() {
         <Link to="/">← 今天</Link>
       </p>
       <div className="flex items-end justify-between">
-        <h1 className="m-0 text-2xl font-black">🛠 關 0</h1>
+        <h1 className="m-0 text-2xl font-bold tracking-tight">關 0 · 環境設定</h1>
         <span className="text-sm text-muted-foreground">一步一步：複製 → 貼到終端機 → 看到結果 → 打勾</span>
       </div>
 
       <div className="flex items-center gap-3" data-testid="setup-progress">
-        <div className="h-3 flex-1 overflow-hidden rounded-full bg-primary/15">
-          <div className="h-full rounded-full bg-gradient-to-r from-primary to-gold transition-[width] duration-500" style={{ width: `${(done / SETUP_STEPS.length) * 100}%` }} />
+        <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-border">
+          <div className="h-full rounded-full bg-primary transition-[width] duration-500" style={{ width: `${(done / SETUP_STEPS.length) * 100}%` }} />
         </div>
-        <span className="text-sm font-bold tabular-nums">
+        <span className="text-sm font-semibold tabular-nums">
           {done}/{SETUP_STEPS.length}
-          {cleared ? ' ✅' : ''}
         </span>
       </div>
 
@@ -67,14 +66,14 @@ export function SetupPage() {
             <li
               key={step.id}
               className={cn(
-                'rounded-2xl bg-card p-3 ring-1 ring-border transition-all',
-                current && 'step-card-shadow ring-2 ring-primary',
-                checked && 'bg-success/5 ring-success/30',
+                'rounded-xl border bg-card p-3 transition-all',
+                current && 'step-card-shadow border-primary',
+                checked && 'border-success/30 bg-success/5',
                 optional && !current && 'opacity-80',
               )}
               data-testid={`setup-${step.id}`}
             >
-              <label className="flex cursor-pointer items-center gap-3 font-semibold">
+              <label className="flex cursor-pointer items-center gap-3 font-medium">
                 <span className="relative grid size-7 shrink-0 place-items-center">
                   <input
                     type="checkbox"
@@ -94,7 +93,7 @@ export function SetupPage() {
               </label>
               {step.command ? (
                 <div className="mt-2 flex items-stretch gap-2">
-                  <pre className="m-0 min-w-0 flex-1 overflow-x-auto rounded-xl bg-foreground px-3 py-2 text-sm text-background">
+                  <pre className="m-0 min-w-0 flex-1 overflow-x-auto rounded-lg bg-foreground px-3 py-2 text-sm text-background">
                     <code>{step.command}</code>
                   </pre>
                   <Button type="button" variant="go" className="self-center" onClick={() => copy(step.command!)}>
@@ -108,8 +107,8 @@ export function SetupPage() {
         })}
       </ol>
 
-      <details className="group rounded-2xl bg-card/70 ring-1 ring-border">
-        <summary className="cursor-pointer list-none px-4 py-3 text-sm font-bold select-none">
+      <details className="group rounded-xl border bg-card/60">
+        <summary className="cursor-pointer list-none px-4 py-3 text-sm font-semibold select-none">
           這些東西在幹嘛（一句話版）
           <span className="float-right text-muted-foreground group-open:rotate-180">▾</span>
         </summary>

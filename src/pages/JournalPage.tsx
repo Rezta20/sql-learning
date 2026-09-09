@@ -26,7 +26,7 @@ export function JournalPage() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-end justify-between">
-        <h1 className="m-0 text-2xl font-black">📓 學習日誌</h1>
+        <h1 className="m-0 text-2xl font-bold tracking-tight">學習日誌</h1>
         <span className="text-sm text-muted-foreground">結算後老師寫一篇</span>
       </div>
       <p className="m-0 text-sm text-muted-foreground">隔天、3 天、7 天回來看一眼，提醒自己學過什麼。</p>
@@ -54,8 +54,8 @@ export function JournalPage() {
                 <button
                   type="button"
                   className={cn(
-                    'w-full rounded-xl px-3 py-2 text-left text-sm font-semibold whitespace-nowrap transition-colors',
-                    e.date === selected ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground ring-1 ring-border hover:bg-accent',
+                    'w-full rounded-lg px-3 py-2 text-left text-sm font-medium whitespace-nowrap transition-colors',
+                    e.date === selected ? 'bg-primary text-primary-foreground' : 'border bg-card text-muted-foreground hover:bg-accent',
                   )}
                   onClick={() => setSelected(e.date)}
                 >
@@ -65,7 +65,7 @@ export function JournalPage() {
               </li>
             ))}
           </ul>
-          <article className="rounded-3xl bg-card p-5 ring-1 ring-border sm:p-6" data-testid="journal-entry">
+          <article className="rounded-2xl border bg-card p-5 sm:p-6" data-testid="journal-entry">
             {entry ? <Markdown text={entry.body} /> : <p className="empty m-0">那天沒有紀錄。</p>}
           </article>
         </div>

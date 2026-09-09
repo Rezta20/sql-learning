@@ -1,3 +1,4 @@
+import { Check, Clock, Lock, Play, Star, Wrench } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
@@ -19,13 +20,13 @@ function cardTone(ratio: number, score: { score: number; total: number } | undef
   return 'warning'
 }
 
-const STATUS_ICON = { locked: '🔒', current: '▶', 'in-progress': '⏳', done: '✅' } as const
+const STATUS_ICON = { locked: Lock, current: Play, 'in-progress': Clock, done: Check } as const
 
 const STATUS_STYLE = {
-  locked: 'bg-muted/60 text-muted-foreground ring-border opacity-80',
-  current: 'bg-card ring-2 ring-primary shadow-[0_6px_0_0_var(--primary)] -translate-y-0.5',
-  'in-progress': 'bg-card ring-primary/40 shadow-[0_4px_0_0_var(--border)]',
-  done: 'bg-success/10 ring-success/40 shadow-[0_4px_0_0_oklch(0.68_0.16_150_/_0.4)]',
+  locked: 'bg-muted/50 text-muted-foreground border-border opacity-75',
+  current: 'bg-card border-primary shadow-[0_4px_0_0_var(--primary)] -translate-y-0.5',
+  'in-progress': 'bg-card border-primary/40 shadow-[0_3px_0_0_var(--border)]',
+  done: 'bg-success/10 border-success/40',
 } as const
 
 export function MapPage() {
@@ -102,33 +103,33 @@ export function MapPage() {
       return lp && lp.exercises.slice(0, l.exercises.length).every(Boolean) && lp.project
     }).length
     const bossDone = Boolean(state.boss[String(day.id)])
+    const Icon = STATUS_ICON[status]
     return (
       <li key={day.id} className="min-w-0">
         <Link
           to={`/day/${day.id}`}
           className={cn(
-            'day-card flex h-full flex-col gap-1.5 rounded-2xl p-3 no-underline ring-1 transition-transform hover:-translate-y-1 hover:no-underline',
+            'day-card flex h-full flex-col gap-1.5 rounded-xl border p-3 no-underline transition-transform hover:-translate-y-1 hover:no-underline',
             STATUS_STYLE[status],
-            meta.isBigBoss && status !== 'locked' && 'ring-boss/50',
+            meta.isBigBoss && status !== 'locked' && 'border-boss/50',
           )}
           data-testid={`day-card-${day.id}`}
           data-tone={tone}
           data-status={status}
         >
-          <span className="flex items-center justify-between text-xs font-bold text-muted-foreground">
-            <span>
-              {STATUS_ICON[status]} {day.id === EXTRA_DAY_ID ? 'Extra' : `關 ${day.id}`}
+          <span className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
+            <span className="inline-flex items-center gap-1">
+              <Icon className={cn('size-3.5', status === 'current' && 'fill-primary text-primary', status === 'done' && 'text-success')} />
+              {day.id === EXTRA_DAY_ID ? 'Extra' : `關 ${day.id}`}
             </span>
-            {meta.isBigBoss ? <span className="text-boss">★</span> : null}
+            {meta.isBigBoss ? <Star className="size-3.5 fill-boss text-boss" /> : null}
           </span>
           <strong className="text-sm leading-snug text-foreground">{day.title}</strong>
           <span className="mt-auto flex items-center gap-1 pt-1" aria-label={`課程 ${lessonsDone}/${meta.lessons.length}`}>
             {meta.lessons.map((l, i) => (
               <span key={l.id} className={cn('h-1.5 flex-1 rounded-full', i < lessonsDone ? 'bg-success' : 'bg-border')} />
             ))}
-            <span className={cn('ml-1 text-xs', bossDone ? '' : 'opacity-30 grayscale')} title="Boss">
-              👾
-            </span>
+            <span className={cn('ml-1 size-2.5 rounded-sm rotate-45', bossDone ? 'bg-boss' : 'bg-border')} title="Boss" />
           </span>
         </Link>
       </li>
@@ -138,8 +139,8 @@ export function MapPage() {
   return (
     <div className="flex flex-col gap-5">
       <div className="flex items-end justify-between">
-        <h1 className="m-0 text-2xl font-black">🗺 地圖</h1>
-        <span className="rounded-full bg-primary/10 px-3 py-1 text-sm font-bold text-primary">
+        <h1 className="m-0 text-2xl font-bold tracking-tight">地圖</h1>
+        <span className="rounded-full bg-primary/10 px-3 py-1 text-sm font-semibold text-primary">
           {cleared}/{CORE_DAY_COUNT} 關
         </span>
       </div>
@@ -148,17 +149,19 @@ export function MapPage() {
         <Link
           to="/setup"
           className={cn(
-            'flex items-center gap-3 rounded-2xl px-4 py-3 no-underline ring-1 hover:no-underline',
-            setupOk ? 'bg-success/10 ring-success/40' : 'bg-card ring-2 ring-primary shadow-[0_5px_0_0_var(--primary)]',
+            'flex items-center gap-3 rounded-xl border px-4 py-3 no-underline hover:no-underline',
+            setupOk ? 'bg-success/10 border-success/40' : 'bg-card border-primary shadow-[0_4px_0_0_var(--primary)]',
           )}
           data-testid="stage0-card"
         >
-          <span className="text-2xl">🛠</span>
+          <span className={cn('grid size-9 place-items-center rounded-lg', setupOk ? 'bg-success/15 text-success' : 'bg-primary/10 text-primary')}>
+            {setupOk ? <Check className="size-5" /> : <Wrench className="size-5" />}
+          </span>
           <span className="flex flex-col">
-            <span className="text-xs font-bold text-muted-foreground">{setupOk ? '✅' : '▶'} 關 0</span>
+            <span className="text-xs font-semibold text-muted-foreground">關 0</span>
             <strong className="text-foreground">環境設定</strong>
           </span>
-          <span className="ml-auto text-sm font-bold text-muted-foreground">
+          <span className="ml-auto text-sm font-semibold text-muted-foreground">
             {setupCount}/{SETUP_STEPS.length}
           </span>
         </Link>
@@ -167,13 +170,11 @@ export function MapPage() {
           {WORLDS.map((w) => {
             const done = worldDone(state, w.id)
             return (
-              <li key={w.id} className={cn('world rounded-3xl bg-card/70 p-4 ring-1 ring-border', done && 'bg-success/5 ring-success/30')}>
-                <h2 className="m-0 flex items-center gap-2 text-base font-black">
-                  <span className="text-2xl" aria-hidden="true">
-                    {w.emoji}
-                  </span>
+              <li key={w.id} className={cn('world rounded-2xl border bg-card/60 p-4', done && 'border-success/30 bg-success/5')}>
+                <h2 className="m-0 flex items-center gap-2 text-base font-bold">
+                  <span className="text-xs font-semibold text-muted-foreground">世界 {w.id}</span>
                   {w.name}
-                  {done ? <span className="text-success">✅</span> : null}
+                  {done ? <Check className="size-4 text-success" /> : null}
                 </h2>
                 <p className="mt-0.5 mb-3 text-sm text-muted-foreground">{w.blurb}</p>
                 <ul className="m-0 grid list-none grid-cols-2 gap-2.5 p-0 sm:grid-cols-3">{w.stageIds.map(renderStage)}</ul>
@@ -181,11 +182,9 @@ export function MapPage() {
             )
           })}
           {unlocked ? (
-            <li className="world rounded-3xl bg-gradient-to-br from-fuchsia-50 to-sky-50 p-4 ring-1 ring-fuchsia-200">
-              <h2 className="m-0 mb-3 flex items-center gap-2 text-base font-black">
-                <span className="text-2xl" aria-hidden="true">
-                  🌈
-                </span>
+            <li className="world rounded-2xl border border-boss/30 bg-boss/5 p-4">
+              <h2 className="m-0 mb-3 flex items-center gap-2 text-base font-bold">
+                <span className="text-xs font-semibold text-muted-foreground">隱藏</span>
                 隱藏關
               </h2>
               <ul className="m-0 grid list-none grid-cols-2 gap-2.5 p-0 sm:grid-cols-3">{renderStage(EXTRA_DAY_ID)}</ul>
@@ -194,22 +193,22 @@ export function MapPage() {
         </ul>
       </section>
 
-      <details className="group rounded-3xl bg-card/70 ring-1 ring-border" data-testid="badges">
-        <summary className="cursor-pointer list-none px-4 py-3 font-bold select-none">
-          🏅 徽章 {earned.length}/{all.length}
+      <details className="group rounded-2xl border bg-card/60" data-testid="badges">
+        <summary className="cursor-pointer list-none px-4 py-3 font-semibold select-none">
+          徽章 {earned.length}/{all.length}
           <span className="float-right text-muted-foreground group-open:rotate-180">▾</span>
         </summary>
         <ul className="m-0 grid list-none grid-cols-2 gap-2 px-4 pb-4 sm:grid-cols-3">
           {all.map((b) => (
             <li
               key={b.id}
-              className={cn('flex flex-col items-center rounded-2xl p-3 text-center ring-1', b.earned ? 'bg-gold/20 ring-gold' : 'bg-muted/50 ring-border opacity-70')}
+              className={cn('flex flex-col items-center rounded-xl border p-3 text-center', b.earned ? 'border-gold bg-gold/15' : 'bg-muted/50 opacity-70')}
               title={b.hint}
             >
-              <span className={cn('text-3xl', b.earned && 'animate-pop')} aria-hidden="true">
-                {b.earned ? b.emoji : '🔒'}
+              <span className={cn('grid size-10 place-items-center text-2xl', b.earned && 'animate-pop')} aria-hidden="true">
+                {b.earned ? b.emoji : <Lock className="size-5 text-muted-foreground" />}
               </span>
-              <span className="mt-1 text-sm font-bold">{b.name}</span>
+              <span className="mt-1 text-sm font-semibold">{b.name}</span>
               <span className="text-xs text-muted-foreground">{b.hint}</span>
             </li>
           ))}

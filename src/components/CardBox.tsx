@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { BookOpen, ChevronDown, ChevronRight, GraduationCap, PenLine } from 'lucide-react'
+import { useState, type ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import type { Card, CardProgress } from '../types'
@@ -27,25 +28,25 @@ export function CardBox({ card, progress, onWritten, onReview, onGraduate, onUnw
   const n = String(card.n).padStart(2, '0')
   const doneReviews = progress ? ['d1', 'd3', 'd7'].filter((k) => progress[k as 'd1' | 'd3' | 'd7']).length : 0
 
-  let action: { label: string; onClick?: () => void; testId: string; variant: Variant } | null
-  if (!progress) action = { label: '✍️ 抄好了', onClick: onWritten, testId: `card-write-${card.n}`, variant: 'gold' }
+  let action: { label: string; icon?: ReactNode; onClick?: () => void; testId: string; variant: Variant } | null
+  if (!progress) action = { label: '抄好了', icon: <PenLine className="size-4" />, onClick: onWritten, testId: `card-write-${card.n}`, variant: 'gold' }
   else if (grad) action = null
-  else if (due) action = { label: '📖 複習完了', onClick: () => onReview?.(due), testId: `card-review-${card.n}`, variant: 'go' }
-  else if (ready) action = { label: '🎓 畢業，撕下', onClick: onGraduate, testId: `card-grad-${card.n}`, variant: 'gold' }
+  else if (due) action = { label: '複習完了', icon: <BookOpen className="size-4" />, onClick: () => onReview?.(due), testId: `card-review-${card.n}`, variant: 'go' }
+  else if (ready) action = { label: '畢業，撕下', icon: <GraduationCap className="size-4" />, onClick: onGraduate, testId: `card-grad-${card.n}`, variant: 'gold' }
   else action = { label: `等複習 ${doneReviews}/3`, testId: `card-wait-${card.n}`, variant: 'soft' }
 
   return (
     <article
       className={cn(
-        'rounded-2xl bg-card ring-1 ring-border transition-shadow',
-        due && 'ring-2 ring-sky shadow-[0_3px_0_0_var(--sky)]',
+        'rounded-xl border bg-card transition-shadow',
+        due && 'border-sky shadow-[0_3px_0_0_var(--sky)]',
         grad && 'opacity-70',
       )}
       data-testid={`card-${card.n}`}
     >
       <div className="flex items-center gap-3 p-3">
         <button type="button" className="flex min-w-0 flex-1 items-center gap-3 text-left" onClick={() => setOpen(!open)} aria-expanded={open}>
-          <span className={cn('shrink-0 rounded-md px-1.5 py-0.5 text-xs font-black', progress ? 'bg-gold text-gold-foreground' : 'bg-muted text-muted-foreground')}>#{n}</span>
+          <span className={cn('shrink-0 rounded px-1.5 py-0.5 text-xs font-bold tabular-nums', progress ? 'bg-gold text-gold-foreground' : 'bg-muted text-muted-foreground')}>#{n}</span>
           <span className="flex min-w-0 flex-col">
             <span className="truncate">
               <strong>{card.en}</strong>
@@ -53,15 +54,18 @@ export function CardBox({ card, progress, onWritten, onReview, onGraduate, onUnw
             </span>
             <span className="truncate text-sm text-muted-foreground">{card.line}</span>
           </span>
-          <span className="ml-auto text-muted-foreground">{open ? '▾' : '▸'}</span>
+          <span className="ml-auto text-muted-foreground">{open ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}</span>
         </button>
         <div className="shrink-0">
           {action ? (
             <Button type="button" variant={action.variant} size="sm" data-testid={action.testId} onClick={action.onClick} disabled={!action.onClick}>
+              {action.icon}
               {action.label}
             </Button>
           ) : (
-            <span className="rounded-full bg-success/15 px-2.5 py-1 text-xs font-bold text-success">🎓 畢業</span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-success/15 px-2.5 py-1 text-xs font-semibold text-success">
+              <GraduationCap className="size-3.5" /> 畢業
+            </span>
           )}
         </div>
       </div>
