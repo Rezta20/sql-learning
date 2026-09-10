@@ -93,6 +93,10 @@ export function TodayPage() {
         <span>關 {sid}</span>
       </p>
 
+      <Link to="/guide" className="text-sm text-muted-foreground" data-testid="today-guide-link">
+        忘了怎麼用？看說明 →
+      </Link>
+
       <MiniCommands />
     </div>
   )

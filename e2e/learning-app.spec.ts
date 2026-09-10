@@ -87,6 +87,19 @@ test('今天頁：關 0 未完成時只顯示一張卡與一顆按鈕', async ({
   await page.screenshot({ path: `${shotDir}/today-setup.png`, fullPage: true })
 })
 
+test('說明頁：從今天頁的分頁進入，列出 7 條每日流程與三個找老師的時刻', async ({ page }) => {
+  await page.goto('/')
+  await page.getByRole('link', { name: '說明', exact: true }).click()
+  await expect(page).toHaveURL(/\/guide$/)
+  await expect(page.getByTestId('guide-page')).toBeVisible()
+  await expect(page.getByTestId('guide-routine').locator('[data-testid^="guide-routine-"]')).toHaveCount(7)
+  await expect(page.getByTestId('guide-teacher')).toContainText('開始')
+  await expect(page.getByTestId('guide-teacher')).toContainText('結算')
+  await page.screenshot({ path: `${shotDir}/guide.png`, fullPage: true })
+  await page.getByTestId('guide-back').click()
+  await expect(page.getByTestId('today-card')).toBeVisible()
+})
+
 test('關 0：打勾七步過關 +30 XP，今天卡切到第一課', async ({ page }) => {
   await page.goto('/setup')
   await expect(page.getByTestId('setup-progress')).toContainText('0/9')

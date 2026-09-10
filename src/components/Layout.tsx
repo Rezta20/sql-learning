@@ -1,4 +1,4 @@
-import { BookOpen, Cloud, CloudOff, Map, NotebookPen, Target } from 'lucide-react'
+import { BookOpen, CircleHelp, Cloud, CloudOff, Map, NotebookPen, Target } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { cn } from '@/lib/utils'
@@ -13,6 +13,7 @@ const NAV = [
   { to: '/map', label: '地圖', Icon: Map },
   { to: '/cards', label: '卡片', Icon: NotebookPen },
   { to: '/journal', label: '日誌', Icon: BookOpen },
+  { to: '/guide', label: '說明', Icon: CircleHelp },
 ]
 
 export function Layout() {
