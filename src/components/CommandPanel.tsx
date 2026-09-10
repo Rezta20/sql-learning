@@ -1,11 +1,12 @@
 import { LifeBuoy, OctagonPause } from 'lucide-react'
 import type { ReactNode } from 'react'
+import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { copyText } from '../lib/clipboard'
 import { messages } from '../lib/messages'
 import { useToast } from './Toast'
 
-/** 角落兩顆：太多了／卡住。其他動作都在流程裡的主按鈕。 */
+/** 角落兩顆：太多了（貼給老師）／卡住（先開字典，查不到再問）。 */
 export function MiniCommands() {
   const toast = useToast()
   const send = async (text: string, label: string) => {
@@ -24,15 +25,10 @@ export function MiniCommands() {
       >
         <OctagonPause className="size-4" /> 太多了
       </Button>
-      <Button
-        type="button"
-        variant="soft"
-        size="sm"
-        className="rounded-full bg-sky-50 text-sky-800 ring-sky-200 hover:bg-sky-100"
-        onClick={() => send(messages.stuck, '卡住')}
-        title="卡住：複製後貼截圖給老師"
-      >
-        <LifeBuoy className="size-4" /> 卡住
+      <Button asChild variant="soft" size="sm" className="rounded-full bg-sky-50 text-sky-800 ring-sky-200 hover:bg-sky-100" title="卡住：先查錯誤字典">
+        <Link to="/stuck" className="no-underline hover:no-underline" data-testid="mini-stuck">
+          <LifeBuoy className="size-4" /> 卡住
+        </Link>
       </Button>
     </div>
   )

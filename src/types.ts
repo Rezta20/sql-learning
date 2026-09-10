@@ -15,6 +15,23 @@ export type Question = {
   explanation: string
 }
 
+/**
+ * 一題練習：她自己對答案，不用問老師。
+ * 三層漸進揭露：hint（卡住先看）→ expect（跟自己的結果比）→ answer（真的不會再看）。
+ */
+export type Exercise = {
+  /** 題目（要打的 SQL 或要做的事） */
+  task: string
+  /** 提示：一句話，指方向不給答案 */
+  hint: string
+  /** 預期結果：筆數＋前幾列，用實際跑 seed 的結果寫的 */
+  expect: string
+  /** 參考答案（SQL 或文字） */
+  answer: string
+  /** 常見錯法（可省略） */
+  pitfalls?: string[]
+}
+
 export type Lesson = {
   id: string
   title: string
@@ -22,19 +39,24 @@ export type Lesson = {
   focus: string
   /** 你能……就算會了（一句） */
   check: string
+  /** 一句話概念（畫面上最大的字） */
   concept: string
+  /** 展開講解：≤5 行，比喻＋英文｜中文｜一句話｜例子 */
+  explain: string[]
   /** 卡片編號（對應 study/cards.json 的 n） */
   cards: number[]
-  exercises: string[]
+  exercises: Exercise[]
   /** 「換成你的專案」題（寵物營養） */
-  project: string
+  project: Exercise
+  /** 「用自己的話講」自評：講出來的內容要碰到這 3 個關鍵字 */
+  teachKeys: string[]
 }
 
 export type StageMeta = {
   id: number
   world: number
   lessons: Lesson[]
-  boss: string
+  boss: Exercise
   isBigBoss: boolean
 }
 
@@ -44,6 +66,8 @@ export type World = {
   emoji: string
   stageIds: number[]
   blurb: string
+  /** 暖身影片（可跳過、不給 XP）：沒精神時看 ≤10 分鐘 */
+  video?: { title: string; url: string; minutes: number; note?: string }
 }
 
 export type Card = {
@@ -85,6 +109,8 @@ export type StoredState = {
   timer: { startedAt: string } | null
   /** 最後一次存檔時間（ISO），雲端同步比新舊用 */
   savedAt?: string
+  /** 在 /stuck 查過的錯誤：`YYYY-MM-DD:errorId`，結算時附進日誌草稿 */
+  stuckLog?: string[]
 }
 
 export type QuizAttempt = {

@@ -1,4 +1,4 @@
-import { Bug, Check, ChevronLeft, ChevronRight, Lightbulb, PawPrint, PenLine, Skull, Sparkles, Speech, Target, Terminal, type LucideIcon } from 'lucide-react'
+import { Bug, Check, ChevronLeft, ChevronRight, Eye, Lightbulb, MessageCircleMore, PawPrint, PenLine, Skull, Sparkles, Speech, Target, Terminal, type LucideIcon } from 'lucide-react'
 import { useMemo, useState, type ReactNode } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
@@ -12,11 +12,12 @@ import { useToast } from '../components/Toast'
 import { getCard } from '../content/cards'
 import { canAccessDay, dayHeading, getDay } from '../content/days'
 import { stageMeta } from '../content/lessons'
+import { copyText } from '../lib/clipboard'
 import { todayKey } from '../lib/dates'
 import { messages, lessonIndex } from '../lib/messages'
 import { XP, currentLessonId, lessonDone, levelFor, totalXp } from '../lib/progress'
 import { loadState, updateState } from '../lib/storage'
-import type { Lesson, LessonProgress, StoredState } from '../types'
+import type { Exercise, Lesson, LessonProgress, StoredState } from '../types'
 
 type Step =
   | { kind: 'focus' }
@@ -120,6 +121,69 @@ function NextButton({
   )
 }
 
+/**
+ * 三層漸進揭露：提示 → 預期結果 → 看答案。
+ * 一次只多開一層，避免一口氣看到全部。
+ */
+function Reveal({ ex, id }: { ex: Exercise; id: string }) {
+  const [level, setLevel] = useState(0)
+  const LABELS = ['提示', '預期結果', '看答案']
+  const box = (title: string, body: ReactNode, tone: string) => (
+    <div className={cn('w-full rounded-xl border px-4 py-3 text-left text-sm', tone)}>
+      <p className="m-0 mb-1 text-xs font-bold text-muted-foreground">{title}</p>
+      {body}
+    </div>
+  )
+  return (
+    <div className="flex w-full max-w-md flex-col items-center gap-2" data-testid={`reveal-${id}`} data-level={level}>
+      {level >= 1 ? box('提示', <p className="m-0">{ex.hint}</p>, 'bg-accent/60') : null}
+      {level >= 2 ? box('預期結果（跟你螢幕上的比）', <p className="m-0 leading-relaxed">{ex.expect}</p>, 'bg-sky/10 border-sky/40') : null}
+      {level >= 3
+        ? box(
+            '參考答案',
+            <>
+              <pre className="m-0 overflow-x-auto rounded-lg bg-foreground px-3 py-2 text-xs leading-relaxed text-background whitespace-pre-wrap">
+                <code>{ex.answer}</code>
+              </pre>
+              {ex.pitfalls?.length ? (
+                <ul className="mt-2 mb-0 list-disc pl-4 text-xs text-muted-foreground">
+                  {ex.pitfalls.map((p) => (
+                    <li key={p}>{p}</li>
+                  ))}
+                </ul>
+              ) : null}
+            </>,
+            'bg-gold/10 border-gold/50',
+          )
+        : null}
+      {level < 3 ? (
+        <Button type="button" variant="ghost" size="sm" className="text-muted-foreground" onClick={() => setLevel(level + 1)} data-testid={`reveal-next-${id}`}>
+          <Eye className="size-4" /> {LABELS[level]}
+        </Button>
+      ) : null}
+    </div>
+  )
+}
+
+/** 次要動作：還是不懂才問老師（複製訊息）。 */
+function AskTeacher({ text, label = '還是不懂？問老師' }: { text: string; label?: string }) {
+  const toast = useToast()
+  return (
+    <Button
+      type="button"
+      variant="link"
+      size="sm"
+      className="text-muted-foreground"
+      onClick={async () => {
+        const ok = await copyText(text)
+        toast(ok ? '已複製 → 聊天框 Cmd+V，補上截圖' : '複製失敗')
+      }}
+    >
+      <MessageCircleMore className="size-4" /> {label}
+    </Button>
+  )
+}
+
 export function StagePage() {
   const { id } = useParams()
   const stageId = Number(id)
@@ -133,6 +197,8 @@ export function StagePage() {
   const isLast = lesson ? meta.lessons.at(-1)?.id === lesson.id : false
   const steps = useMemo(() => (lesson ? buildSteps(lesson, isLast) : []), [lesson, isLast])
   const [stepIdx, setStepIdx] = useState<number | null>(null)
+  /** 「講出來」自評勾選（只在畫面上，不存檔） */
+  const [teachChecks, setTeachChecks] = useState<Record<number, boolean>>({})
 
   if (!day) return <p>找不到這一關。</p>
   if (!canAccessDay(day.id)) {
@@ -189,8 +255,21 @@ export function StagePage() {
       case 'concept':
         return (
           <>
-            <Kicker>概念（老師也會在聊天裡講）</Kicker>
+            <Kicker>概念（一句話）</Kicker>
             <Title className="text-xl sm:text-2xl">{lesson.concept}</Title>
+            {lesson.explain.length ? (
+              <details className="group mb-5 w-full max-w-md rounded-xl border bg-accent/50 text-left" data-testid="concept-explain">
+                <summary className="cursor-pointer list-none px-4 py-2.5 text-sm font-semibold select-none">
+                  展開看 {lesson.explain.length} 行講解
+                  <span className="float-right text-muted-foreground group-open:rotate-180">▾</span>
+                </summary>
+                <ol className="m-0 flex list-decimal flex-col gap-1.5 px-4 pb-3 pl-8 text-sm leading-relaxed">
+                  {lesson.explain.map((line) => (
+                    <li key={line}>{line}</li>
+                  ))}
+                </ol>
+              </details>
+            ) : null}
             <Button
               type="button"
               variant="success"
@@ -204,7 +283,7 @@ export function StagePage() {
             >
               <Check className="size-5" /> 聽懂了
             </Button>
-            <p className="mt-3 mb-0 text-sm text-muted-foreground">聽不懂？按右下角「太多了」。</p>
+            <p className="mt-3 mb-0 text-sm text-muted-foreground">看不懂？先抄下面的卡，做完題目常常就懂了。還是不懂再按右下角「太多了」。</p>
           </>
         )
       case 'card': {
@@ -254,20 +333,21 @@ export function StagePage() {
       }
       case 'exercise': {
         const done = Boolean(lp.exercises[step.i])
+        const ex = lesson.exercises[step.i]
         return (
           <>
             <Kicker>
               第 {step.i + 1} 題 / {lesson.exercises.length}
             </Kicker>
-            <pre className="my-4 overflow-x-auto rounded-2xl bg-foreground p-4 text-left text-base leading-relaxed text-background">
-              <code>{lesson.exercises[step.i]}</code>
+            <pre className="my-4 w-full overflow-x-auto rounded-2xl bg-foreground p-4 text-left text-base leading-relaxed text-background whitespace-pre-wrap">
+              <code>{ex.task}</code>
             </pre>
-            <p className="mt-0 mb-5 text-sm text-muted-foreground">親手打進 psql，不要複製貼上。</p>
-            <div className="flex flex-col items-center gap-3">
-              <CopyButton text={messages.exercise(stageId, lesson, step.i)} label="做完了，貼給老師" after="貼上後把結果截圖一起送出。" tone="plain" />
+            <p className="mt-0 mb-4 text-sm text-muted-foreground">親手打進 psql，不要複製貼上。做完把結果跟「預期結果」比。</p>
+            <div className="flex w-full flex-col items-center gap-3">
+              <Reveal ex={ex} id={`${lesson.id}-${step.i}`} />
               <NextButton
                 done={done}
-                label="老師說對了"
+                label="結果跟預期一樣 ✓"
                 testId={`ex-${lesson.id}-${step.i}`}
                 onClick={() => {
                   if (!done) patchLesson((p) => (p.exercises[step.i] = true))
@@ -275,6 +355,7 @@ export function StagePage() {
                   next()
                 }}
               />
+              <AskTeacher text={messages.exercise(stageId, lesson, step.i)} />
             </div>
           </>
         )
@@ -283,12 +364,13 @@ export function StagePage() {
         return (
           <>
             <Kicker>換成你的專案</Kicker>
-            <Title className="text-xl sm:text-2xl">{lesson.project}</Title>
-            <div className="flex flex-col items-center gap-3">
-              <CopyButton text={messages.project(stageId, lesson)} label="寫好了，貼給老師" after="把你寫的 SQL 或照片一起送出。" tone="plain" />
+            <Title className="text-xl sm:text-2xl">{lesson.project.task}</Title>
+            <p className="mt-0 mb-4 text-sm text-muted-foreground">先寫在筆記本，再打開參考答案比。意思一樣就算對，欄名不同沒關係。</p>
+            <div className="flex w-full flex-col items-center gap-3">
+              <Reveal ex={lesson.project} id={`${lesson.id}-project`} />
               <NextButton
                 done={lp.project}
-                label="老師說對了"
+                label="跟參考答案意思一樣 ✓"
                 testId={`project-${lesson.id}`}
                 onClick={() => {
                   if (!lp.project) patchLesson((p) => (p.project = true))
@@ -296,29 +378,56 @@ export function StagePage() {
                   next()
                 }}
               />
+              <AskTeacher text={messages.project(stageId, lesson)} label="不確定？問老師" />
             </div>
           </>
         )
-      case 'teach':
+      case 'teach': {
+        const allKeys = lesson.teachKeys.every((_, i) => teachChecks[i])
         return (
           <>
             <Kicker>用自己的話講一次</Kicker>
-            <Title className="text-xl sm:text-2xl">「{lesson.title}」是什麼？講給老師聽。</Title>
-            <div className="flex flex-col items-center gap-3">
-              <CopyButton text={messages.teach(stageId, lesson)} label="複製開頭，接著打你的話" after="不用完美，講錯老師會補一句。" tone="plain" />
-              <NextButton
-                done={lp.teach}
-                label="老師聽懂了"
-                testId={`teach-${lesson.id}`}
+            <Title className="text-xl sm:text-2xl">「{lesson.title}」是什麼？大聲講出來（對著夥伴講也可以）。</Title>
+            <p className="mt-0 mb-3 text-sm text-muted-foreground">講完後勾：你有講到這 3 件事嗎？</p>
+            <ul className="m-0 mb-4 flex w-full max-w-md list-none flex-col gap-2 p-0 text-left" data-testid="teach-keys">
+              {lesson.teachKeys.map((k, i) => (
+                <li key={k}>
+                  <label className={cn('flex cursor-pointer items-center gap-3 rounded-xl border bg-card px-4 py-2.5 text-sm font-medium', teachChecks[i] && 'border-success/40 bg-success/10')}>
+                    <input
+                      type="checkbox"
+                      checked={Boolean(teachChecks[i]) || lp.teach}
+                      disabled={lp.teach}
+                      onChange={() => setTeachChecks((c) => ({ ...c, [i]: !c[i] }))}
+                      className="size-5 accent-[var(--success)]"
+                      data-testid={`teach-key-${i}`}
+                    />
+                    {k}
+                  </label>
+                </li>
+              ))}
+            </ul>
+            <div className="flex w-full flex-col items-center gap-3">
+              <Button
+                type="button"
+                variant={lp.teach ? 'soft' : 'success'}
+                size="xl"
+                className="w-full max-w-sm"
+                disabled={!lp.teach && !allKeys}
+                data-testid={`teach-${lesson.id}`}
                 onClick={() => {
                   if (!lp.teach) patchLesson((p) => (p.teach = true))
                   if (!lp.teach) toast(`+${XP.teach} XP`)
                   next()
                 }}
-              />
+              >
+                {lp.teach ? <Check className="size-5" /> : <Speech className="size-5" />}
+                {lp.teach ? '已完成，下一步' : allKeys ? '三個都講到了 ✓' : '勾滿 3 個才能過'}
+              </Button>
+              <AskTeacher text={messages.teach(stageId, lesson)} label="想讓老師聽？複製開頭，接著打你的話" />
             </div>
           </>
         )
+      }
       case 'boss': {
         const done = Boolean(state.boss[String(stageId)])
         return (
@@ -326,12 +435,13 @@ export function StagePage() {
             <Kicker>
               <span className="text-boss">{meta.isBigBoss ? '大 Boss' : 'Boss 題'}</span>
             </Kicker>
-            <Title className="text-xl sm:text-2xl">{meta.boss}</Title>
-            <div className="flex flex-col items-center gap-3">
-              <CopyButton text={messages.boss(stageId)} label="驗收，貼給老師" after="老師會出題；你答完他判定。" tone="plain" />
+            <Title className="text-xl sm:text-2xl">{meta.boss.task}</Title>
+            <p className="mt-0 mb-4 text-sm text-muted-foreground">自己做完，再看參考答案。跟預期一樣就是過關。</p>
+            <div className="flex w-full flex-col items-center gap-3">
+              <Reveal ex={meta.boss} id={`boss-${stageId}`} />
               <NextButton
                 done={done}
-                label="老師說過關了"
+                label="過關 ✓（我自己判定）"
                 doneLabel="已過關，下一步"
                 variant="boss"
                 testId="boss-check"
@@ -344,6 +454,7 @@ export function StagePage() {
                   next()
                 }}
               />
+              <AskTeacher text={messages.boss(stageId, meta.boss)} label="不確定過不過？貼給老師判" />
             </div>
           </>
         )
@@ -363,7 +474,7 @@ export function StagePage() {
             <CopyButton
               text={messages.settle(state, stageId, lesson)}
               label="結算，貼給老師"
-              after="老師會寫今天的日誌、給你手寫卡總表。"
+              after="訊息裡已附上 App 寫好的日誌草稿；老師只要存檔、更新進度、給手寫卡總表。"
               tone="end"
               testId="step-settle"
             />
@@ -389,6 +500,7 @@ export function StagePage() {
                   onClick={() => {
                     setLessonId(nextLesson.id)
                     setStepIdx(0)
+                    setTeachChecks({})
                   }}
                 >
                   明天：第 {lessonIndex(nextLesson)} 課 {nextLesson.title} <ChevronRight className="size-4" />
@@ -431,6 +543,7 @@ export function StagePage() {
               onClick={() => {
                 setLessonId(l.id)
                 setStepIdx(null)
+                setTeachChecks({})
               }}
             >
               {done ? <Check className="size-3.5" /> : null}第 {i + 1} 課

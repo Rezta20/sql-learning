@@ -1,4 +1,4 @@
-import { Check, Clock, Lock, Play, Star, Wrench } from 'lucide-react'
+import { Check, Clock, Lock, Play, Star, Wrench, CirclePlay } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
@@ -176,7 +176,20 @@ export function MapPage() {
                   {w.name}
                   {done ? <Check className="size-4 text-success" /> : null}
                 </h2>
-                <p className="mt-0.5 mb-3 text-sm text-muted-foreground">{w.blurb}</p>
+                <p className="mt-0.5 mb-2 text-sm text-muted-foreground">{w.blurb}</p>
+                {w.video ? (
+                  <a
+                    href={w.video.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    title={w.video.note}
+                    className="mb-3 inline-flex max-w-full items-center gap-1.5 rounded-full border bg-card px-3 py-1 text-xs font-medium text-muted-foreground no-underline hover:bg-accent hover:no-underline"
+                    data-testid={`world-video-${w.id}`}
+                  >
+                    <CirclePlay className="size-3.5 shrink-0 text-red-600" />
+                    <span className="truncate">暖身影片 {w.video.minutes} 分（可跳過）：{w.video.title}</span>
+                  </a>
+                ) : null}
                 <ul className="m-0 grid list-none grid-cols-2 gap-2.5 p-0 sm:grid-cols-3">{w.stageIds.map(renderStage)}</ul>
               </li>
             )
